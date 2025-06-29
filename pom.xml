@@ -5,11 +5,11 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.moola.fx</groupId>
-    <artifactId>moneychanger-operations</artifactId>
+    <artifactId>moneychanger-reservation</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>MoneyChanger-api Spring Boot</name>
-    <description>A SpringBoot application to support MoneyGrab Application. This hosts the MoneyChanger, Commission APIs</description>
+    <name>Reservation-api Spring Boot</name>
+    <description>A SpringBoot application to support MoneyGrab Application. This hosts the Reservation, Transaction APIs</description>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -256,8 +256,6 @@
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <!-- set your minimum coverage ratio here -->
-                                            <!-- FIXME INCREASE CODE COVERAGE TO 80% -->
                                             <minimum>0.40</minimum>
                                         </limit>
                                     </limits>

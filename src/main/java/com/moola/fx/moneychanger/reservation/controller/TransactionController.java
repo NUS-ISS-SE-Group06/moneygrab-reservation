@@ -28,8 +28,9 @@ public class TransactionController {
      */
     @GetMapping
    public ResponseEntity<?> getByMoneyChanger(@RequestParam int moneyChangerId) {
+     
         List<Transaction> transactions = service.listByMoneyChanger(moneyChangerId);
-
+System.out.println("Returned size: " + transactions.size());
         if (transactions == null || transactions.isEmpty()) {
             return ResponseEntity
                     .status(404)

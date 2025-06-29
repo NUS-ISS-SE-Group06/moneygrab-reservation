@@ -5,14 +5,14 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "`transaction`")   // back-ticks because “transaction” is SQL-reserved
+@Table(name = "`transaction`")   
 public class Transaction {
 
-    /* ---------- PK & FKs ---------- */
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;                    // Integer, not int
+    private Integer id;                    
 
     @Column(name = "customer_id")
     private Integer customerId;
@@ -20,10 +20,10 @@ public class Transaction {
     @Column(name = "money_changer_id")
     private Integer moneyChangerId;
 
-    @Column(name = "currency_id")          // ← typo fixed (was current_id)
+    @Column(name = "currency_id")          
     private Integer currencyId;
 
-    /* ---------- Core Fields ---------- */
+
 
     @Column(name = "transaction_date")
     private Timestamp transactionDate;
@@ -34,8 +34,7 @@ public class Transaction {
     private String email;
     private String comments;
 
-    /* ---------- Monetary Values ---------- */
-    // BigDecimal is safer than double for money
+  
     @Column(name = "exchange_rate", precision = 18, scale = 8)
     private BigDecimal exchangeRate;
 
@@ -48,10 +47,11 @@ public class Transaction {
     @Column(name = "received_cash", precision = 18, scale = 2)
     private BigDecimal receivedCash;
 
-    /* ---------- Audit ---------- */
+   
 
-    @Column(name = "created_at")
+    @Column(name = "created_at",nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
+   
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
@@ -62,7 +62,7 @@ public class Transaction {
     @Column(name = "updated_by")
     private Integer updatedBy;
 
-    /* ---------- Getters & Setters ---------- */
+   
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
