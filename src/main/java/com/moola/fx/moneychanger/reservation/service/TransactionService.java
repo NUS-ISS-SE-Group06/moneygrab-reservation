@@ -1,31 +1,29 @@
 package com.moola.fx.moneychanger.reservation.service;
 
-import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
-import com.moola.fx.moneychanger.reservation.mapper.TransactionMapper;
-import com.moola.fx.moneychanger.reservation.model.Transaction;
-import com.moola.fx.moneychanger.reservation.repository.TransactionRepository;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
+import com.moola.fx.moneychanger.reservation.mapper.TransactionMapper;
+import com.moola.fx.moneychanger.reservation.repository.TransactionRepository;
 
 @Service
 public class TransactionService {
 
     private final TransactionRepository repository;
 
+    // Either annotate…
+    @Autowired                      // optional if this is the only ctor
     public TransactionService(TransactionRepository repository) {
         this.repository = repository;
     }
 
-    // public List<Transaction> getAllTransactions() {
-    //     return repository.findAll();
-    // }
-     /** Find by money-changer and map entities → DTOs */
     public List<TransactionDto> listByMoneyChanger(int moneyChangerId) {
-        return repository.findByMoneyChangerId(moneyChangerId)          // List<Transaction>
+        return repository.findByMoneyChangerId(moneyChangerId)
                          .stream()
-                         .map(TransactionMapper::toDto)                // → TransactionDto
-                         .collect(Collectors.toList());
+                         .map(TransactionMapper::toDto)
+                         .toList();
     }
 }

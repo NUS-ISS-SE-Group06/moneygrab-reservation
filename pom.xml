@@ -38,7 +38,7 @@
         <sonar-maven-plugin.version>5.1.0.4751</sonar-maven-plugin.version>
         <spring-boot-maven-plugin.version>3.5.0</spring-boot-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
-        <tika.version>3.2.0</tika.version>
+      
     </properties>
 
     <dependencies>
@@ -131,12 +131,6 @@
             <version>${lombok.version}</version>
         </dependency>
 
-        <!-- Apache Tika for file MIME type detection -->
-        <dependency>
-            <groupId>org.apache.tika</groupId>
-            <artifactId>tika-core</artifactId>
-            <version>${tika.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
