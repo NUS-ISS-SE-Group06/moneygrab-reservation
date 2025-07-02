@@ -40,13 +40,13 @@ public class Transaction {
     @Column(name = "exchange_rate", precision = 18, scale = 8)
     private BigDecimal exchangeRate;
 
-    @Column(name = "foreign_amount", precision = 18, scale = 2)
+    @Column(name = "foreign_amount", precision = 18, scale = 8)
     private BigDecimal foreignAmount;
 
-    @Column(name = "sgd_amount", precision = 18, scale = 2)
+    @Column(name = "sgd_amount", precision = 18, scale = 8)
     private BigDecimal sgdAmount;
 
-    @Column(name = "received_cash", precision = 18, scale = 2)
+    @Column(name = "received_cash", precision = 18, scale = 8)
     private BigDecimal receivedCash;
 
    
