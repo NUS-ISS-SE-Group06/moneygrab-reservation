@@ -14,6 +14,7 @@ public class TransactionDto {
     private Integer moneyChangerId;
     private String moneyChanger;
     private Integer currencyId;
+    private String currency;
     private String currentStatus;
     private String email;
     private String comments;
