@@ -1,0 +1,43 @@
+
+### Transaction
+### List
+GET http://localhost:8688/api/v1/transaction?moneyChangerId=1
+Content-Type: application/json
+[
+    {
+        "id": 4,
+        "customerId": 1,
+        "moneyChangerId": 1,
+        "currencyId": 1,
+        "transactionDate": "2025-06-26T22:23:57.000+00:00",
+        "currentStatus": "Completed",
+        "email": "john.doe@example.com",
+        "comments": "First transaction.",
+        "exchangeRate": 1.35000000,
+        "foreignAmount": 100.00,
+        "sgdAmount": 135.00,
+        "receivedCash": 135.00,
+        "createdAt": "2025-06-26T22:23:57.000+00:00",
+        "updatedAt": "2025-06-26T22:23:57.000+00:00",
+        "createdBy": 1,
+        "updatedBy": 1
+    },
+    {
+        "id": 7,
+        "customerId": 1,
+        "moneyChangerId": 1,
+        "currencyId": 2,
+        "transactionDate": "2025-06-28T10:05:31.000+00:00",
+        "currentStatus": "PENDING",
+        "email": "customer@example.com",
+        "comments": "First transaction",
+        "exchangeRate": 1.35670000,
+        "foreignAmount": 100.00,
+        "sgdAmount": 135.67,
+        "receivedCash": 140.00,
+        "createdAt": "2025-06-28T10:05:31.000+00:00",
+        "updatedAt": "2025-06-28T10:05:31.000+00:00",
+        "createdBy": 1,
+        "updatedBy": 1
+    }
+]
