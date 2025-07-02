@@ -78,4 +78,5 @@ public class Transaction {
     protected void onUpdate() {
         this.updatedAt = new Timestamp(System.currentTimeMillis());
     }
+    
 }
