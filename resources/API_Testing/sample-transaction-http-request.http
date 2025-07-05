@@ -1,7 +1,7 @@
 
 ### Transaction
-### List
-GET http://localhost:8688/api/v1/transaction?moneyChangerId=1
+### List by moneyChangerId
+GET http://localhost:8688/api/v1/moneychanger/1/transactions
 Content-Type: application/json
 [
     {
@@ -37,6 +37,74 @@ Content-Type: application/json
         "receivedCash": 140.00,
         "createdAt": "2025-06-28T10:05:31.000+00:00",
         "updatedAt": "2025-06-28T10:05:31.000+00:00",
+        "createdBy": 1,
+        "updatedBy": 1
+    }
+]
+### List All Transaction
+GET http://localhost:8688/api/v1/transactions
+Content-Type: application/json
+[
+    {
+        "id": 1,
+        "transactionDate": "2025-06-29T09:17:02.000+00:00",
+        "customerId": 101,
+        "customerName": null,
+        "moneyChangerId": 1,
+        "moneyChanger": null,
+        "currencyId": 2,
+        "currency": null,
+        "currentStatus": "CONFIRMED",
+        "email": "customer@example.com",
+        "comments": "Confirmed over counter",
+        "exchangeRate": 1.36550000,
+        "foreignAmount": 100.00000000,
+        "sgdAmount": 136.55000000,
+        "receivedCash": 140.00000000,
+        "createdAt": "2025-06-29T09:17:02.000+00:00",
+        "updatedAt": "2025-06-29T09:17:02.000+00:00",
+        "createdBy": 9001,
+        "updatedBy": 9001
+    },
+    {
+        "id": 2,
+        "transactionDate": "2025-07-05T12:00:00.000+00:00",
+        "customerId": 101,
+        "customerName": null,
+        "moneyChangerId": 5,
+        "moneyChanger": null,
+        "currencyId": 2,
+        "currency": null,
+        "currentStatus": "COMPLETED",
+        "email": "user@example.com",
+        "comments": "First transaction test",
+        "exchangeRate": 1.34850000,
+        "foreignAmount": 100.00000000,
+        "sgdAmount": 134.85000000,
+        "receivedCash": 135.00000000,
+        "createdAt": "2025-07-05T14:46:40.000+00:00",
+        "updatedAt": "2025-07-05T14:46:40.000+00:00",
+        "createdBy": 1,
+        "updatedBy": 1
+    },
+    {
+        "id": 3,
+        "transactionDate": "2025-07-05T12:00:00.000+00:00",
+        "customerId": 101,
+        "customerName": null,
+        "moneyChangerId": 5,
+        "moneyChanger": null,
+        "currencyId": 6,
+        "currency": null,
+        "currentStatus": "COMPLETED",
+        "email": "user@example.com",
+        "comments": "First transaction test",
+        "exchangeRate": 1.34850000,
+        "foreignAmount": 100.00000000,
+        "sgdAmount": 134.85000000,
+        "receivedCash": 135.00000000,
+        "createdAt": "2025-07-05T14:47:10.000+00:00",
+        "updatedAt": "2025-07-05T14:47:10.000+00:00",
         "createdBy": 1,
         "updatedBy": 1
     }

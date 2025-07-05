@@ -1,20 +1,20 @@
 package com.moola.fx.moneychanger.reservation.controller;
 
 import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
-import com.moola.fx.moneychanger.reservation.model.Transaction;
 import com.moola.fx.moneychanger.reservation.service.TransactionService;
 
-import org.springframework.http.HttpStatus;
+import jakarta.validation.constraints.Positive;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1/transaction")
+@RequestMapping("/v1")
 public class TransactionController {
 
     private final TransactionService service;
@@ -25,17 +25,23 @@ public class TransactionController {
     }
 
     /**
-     * GET /api/transaction
+     * GET /moneychanger/{moneyChangerId}/transactions
+     * Returns all transactions as JSON for the moneychanger.
+     */
+    @GetMapping("/moneychanger/{moneyChangerId}/transactions")
+  public ResponseEntity<List<TransactionDto>> listByMoneyChanger(
+            @PathVariable @Positive int moneyChangerId) {
+
+        List<TransactionDto> tx = service.listByMoneyChanger(moneyChangerId);
+        return ResponseEntity.ok(tx);           // 200 even if empty []
+    }
+    /**
+     * GET /transactions
      * Returns all transactions as JSON.
      */
-    @GetMapping
-    public ResponseEntity<List<TransactionDto>> getByMoneyChanger(@RequestParam int moneyChangerId) {
-
-        List<TransactionDto> list = service.listByMoneyChanger(moneyChangerId);
-
-        if (list.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        return ResponseEntity.ok(list);
+    @GetMapping("/transactions")
+    public ResponseEntity<List<TransactionDto>> listAllTransactions() {
+        List<TransactionDto> all = service.listAll();
+        return ResponseEntity.ok(all);
     }
 }
