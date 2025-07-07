@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public  interface TransactionService{
     List <TransactionDto> listAll();
     List <TransactionDto> listByMoneyChanger(int moneyChangerId);
+    TransactionDto updateTransactionStatus(int id, String status,int userid);
 
 }
 

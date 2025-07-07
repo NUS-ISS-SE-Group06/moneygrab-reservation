@@ -2,8 +2,14 @@ package com.moola.fx.moneychanger.reservation.service;
 
 import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.mapper.TransactionMapper;
+import com.moola.fx.moneychanger.reservation.model.Transaction;
 import com.moola.fx.moneychanger.reservation.repository.TransactionRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -29,5 +35,19 @@ public class TransactionServiceImpl implements TransactionService {
                 .map(TransactionMapper::toDto)
                 .toList();
     }
+
+  @Override
+    @Transactional   // only the 2nd call is read-only
+    public TransactionDto updateTransactionStatus(int id, String status, int userId) {
+
+        int rows = repository.updateStatus(id, status, userId);
+        if (rows == 0) {
+            throw new EntityNotFoundException("Transaction " + id);
+        }
+
+        // Fetch the (now-updated) entity so we can return a DTO
+        return TransactionMapper.toDto(repository.getReferenceById(id));
+    }
+   
 
 }

@@ -3,12 +3,18 @@ package com.moola.fx.moneychanger.reservation.controller;
 import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.service.TransactionService;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -44,4 +50,23 @@ public class TransactionController {
         List<TransactionDto> all = service.listAll();
         return ResponseEntity.ok(all);
     }
+    /**
+     * PATCH /v1/transactions/{id}/status
+     * Body: { "status": "COMPLETED" }
+     * Header X-User-Id: caller’s userId (for audit)
+     */
+@PatchMapping("/transactions/{id}/status")
+public ResponseEntity<TransactionDto> updateTransactionStatus(
+        @PathVariable int id,
+        @RequestParam String status,
+        @RequestParam int userId) {
+
+    if (status.isBlank() || userId <= 0) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    TransactionDto dto = service.updateTransactionStatus(id, status, userId);
+    return ResponseEntity.ok(dto);
+}
+
 }
