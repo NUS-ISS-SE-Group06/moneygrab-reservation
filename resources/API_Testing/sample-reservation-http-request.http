@@ -1,5 +1,52 @@
-### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+###
+GET http://localhost:8688/api/v1/reservations
+Content-Type: application/json
+
 
 ###
+GET http://localhost:8688/api/v1/reservations/1
+Content-Type: application/json
+
+
+
+###
+POST http://localhost:8688/api/v1/reservations
+Content-Type: application/json
+
+{
+  "customerId": 2,
+  "moneyChangerId": 5,
+  "currencyId": 1,
+  "exchangeRate":  1.35000000,
+  "foreignAmount": 500.00000000,
+  "sgdAmount": 675.00000000,
+  "status": "PENDING",
+  "expiresAt": "2025-12-08T12:00:00.000+00:00",
+  "createdAt": "2025-07-07T17:56:35.000+00:00",
+  "updatedAt": "2025-07-07T17:56:35.000+00:00",
+  "createdBy": 1,
+  "updatedBy": 1
+}
+> {% client.global.set("reservationId", response.body.id); %}
+
+###
+PUT http://localhost:8688/api/v1/reservations/{{reservationId}}
+Content-Type: application/json
+
+{
+  "customerId": 6,
+  "moneyChangerId": 5,
+  "currencyId": 1,
+  "exchangeRate":  1.35000000,
+  "foreignAmount": 500.00000000,
+  "sgdAmount": 675.00000000,
+  "status": "PENDING",
+  "expiresAt": "2025-12-08T12:00:00.000+00:00",
+  "createdAt": "2025-07-07T17:56:35.000+00:00",
+  "updatedAt": "2025-07-07T17:56:35.000+00:00",
+  "createdBy": 1,
+  "updatedBy": 1
+}
+
+###
+DELETE http://localhost:8688/api/v1/reservations/{{reservationId}}
