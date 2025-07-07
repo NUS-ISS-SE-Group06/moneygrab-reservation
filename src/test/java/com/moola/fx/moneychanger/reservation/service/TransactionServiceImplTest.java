@@ -4,6 +4,9 @@ import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.mapper.TransactionMapper;
 import com.moola.fx.moneychanger.reservation.model.Transaction;
 import com.moola.fx.moneychanger.reservation.repository.TransactionRepository;
+
+import jakarta.persistence.EntityNotFoundException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,8 +21,11 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * Unit tests for {@link TransactionServiceImpl}.
  * <p>
@@ -115,4 +121,54 @@ class TransactionServiceImplTest {
         verify(repository).findByMoneyChangerId(mcId);
         mapperMock.verify(() -> TransactionMapper.toDto(entities.get(0)));
     }
+    /* ------------------------------------------------------------------
+ * Tests for updateTransactionStatus(...)
+ * ------------------------------------------------------------------ */
+
+@Test
+@DisplayName("updateTransactionStatus() returns mapped DTO when row updated")
+void updateStatusSuccess() {
+    // Arrange
+    int id = 1;
+    String status = "COMPLETED";
+    int userId = 9;
+
+    Transaction entity = entity(id);              // helper from the class
+    entity.setCurrentStatus(status);
+
+    when(repository.updateStatus(id, status, userId)).thenReturn(1);
+    when(repository.getReferenceById(id)).thenReturn(entity);
+
+    TransactionDto expectedDto = dto(id);         // helper from the class
+    expectedDto.setCurrentStatus(status);
+
+    mapperMock.when(() -> TransactionMapper.toDto(entity))
+              .thenReturn(expectedDto);
+
+    // Act
+    TransactionDto result = service.updateTransactionStatus(id, status, userId);
+
+    // Assert
+    assertThat(result.getId()).isEqualTo(id);
+    assertThat(result.getCurrentStatus()).isEqualTo(status);
+
+    verify(repository).updateStatus(id, status, userId);
+    verify(repository).getReferenceById(id);
+    mapperMock.verify(() -> TransactionMapper.toDto(entity));
+}
+
+@Test
+@DisplayName("updateTransactionStatus() throws when no rows updated")
+void updateStatusNotFound() {
+    when(repository.updateStatus(anyInt(), anyString(), anyInt()))
+            .thenReturn(0);                       // simulate missing record
+
+    assertThatThrownBy(() -> service.updateTransactionStatus(42, "CANCELLED", 9))
+            .isInstanceOf(EntityNotFoundException.class)
+            .hasMessageContaining("42");
+
+    verify(repository, never()).getReferenceById(anyInt());
+    mapperMock.verifyNoInteractions();            // mapper never called
+}
+
 }

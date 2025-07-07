@@ -4,14 +4,14 @@ import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.service.TransactionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 
 import static org.mockito.Mockito.when;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+
 
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,6 +20,7 @@ import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 
 @WebMvcTest(TransactionController.class)
@@ -61,4 +62,24 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
+    @Test
+@DisplayName("PATCH /v1/transactions/{id}/status updates status")
+void testUpdateTransactionStatus() throws Exception {
+    int id = 1;
+    String newStatus = "COMPLETED";
+    int userId = 9;
+
+    TransactionDto updated = mockDto(id);
+    updated.setCurrentStatus(newStatus);
+
+    when(service.updateTransactionStatus(id, newStatus, userId))
+            .thenReturn(updated);
+
+    mockMvc.perform(patch("/v1/transactions/{id}/status", id)
+                    .param("status", newStatus)
+                    .param("userId", String.valueOf(userId)))
+           .andExpect(status().isOk())
+           .andExpect(jsonPath("$.id").value(id))
+           .andExpect(jsonPath("$.currentStatus").value(newStatus));
+}
 }
