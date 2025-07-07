@@ -109,3 +109,5 @@ Content-Type: application/json
         "updatedBy": 1
     }
 ]
+### Update Transaction Status
+PATCH http://localhost:8688/api/v1/transactions/{id}/status?status={status}&userId={userId}
