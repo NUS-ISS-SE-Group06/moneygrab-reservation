@@ -21,16 +21,12 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 /**
  * Unit tests for {@link TransactionServiceImpl}.
- * <p>
- * Uses Mockito for repository mocking and Mockito's static-mock
- * feature to intercept {@code TransactionMapper.toDto}.
  */
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceImplTest {
@@ -40,9 +36,9 @@ class TransactionServiceImplTest {
 
     private TransactionServiceImpl service;
 
-    private MockedStatic<TransactionMapper> mapperMock;  // static mock handle
+    private MockedStatic<TransactionMapper> mapperMock;
 
-    /* ---------- helper ---------- */
+    /* ---------- helper methods ---------- */
 
     private static Transaction entity(int id) {
         Transaction t = new Transaction();
@@ -60,13 +56,11 @@ class TransactionServiceImplTest {
         return d;
     }
 
-    /* ---------- test life-cycle ---------- */
+    /* ---------- test lifecycle ---------- */
 
     @BeforeEach
     void setUp() {
         service = new TransactionServiceImpl(repository);
-
-        // Static mock for TransactionMapper.toDto(...)
         mapperMock = Mockito.mockStatic(TransactionMapper.class);
     }
 
@@ -75,100 +69,99 @@ class TransactionServiceImplTest {
         mapperMock.close();
     }
 
-    /* ---------- tests ---------- */
+    /* ------------------------------------------------------------------
+     * Tests for listAll()
+     * ------------------------------------------------------------------ */
 
     @Test
-    @DisplayName("listAll() maps every entity to DTO and returns the list")
+    @DisplayName("listAll() should return list of mapped DTOs")
     void listAllReturnsMappedDtos() {
-        // given
         List<Transaction> entities = List.of(entity(1), entity(2));
         when(repository.findAll()).thenReturn(entities);
 
-        // stub static mapper
-        mapperMock.when(() -> TransactionMapper.toDto(entities.get(0)))
-                  .thenReturn(dto(1));
-        mapperMock.when(() -> TransactionMapper.toDto(entities.get(1)))
-                  .thenReturn(dto(2));
+        mapperMock.when(() -> TransactionMapper.toDto(entities.get(0))).thenReturn(dto(1));
+        mapperMock.when(() -> TransactionMapper.toDto(entities.get(1))).thenReturn(dto(2));
 
-        // when
         List<TransactionDto> result = service.listAll();
 
-        // then
-        assertThat(result).hasSize(2)
-                          .extracting(TransactionDto::getId)
-                          .containsExactly(1, 2);
+        assertThat(result)
+                .hasSize(2)
+                .extracting(TransactionDto::getId)
+                .containsExactly(1, 2);
 
         verify(repository).findAll();
         mapperMock.verify(() -> TransactionMapper.toDto(any(Transaction.class)), times(2));
     }
 
+    /* ------------------------------------------------------------------
+     * Tests for listByMoneyChanger()
+     * ------------------------------------------------------------------ */
+
     @Test
-    @DisplayName("listByMoneyChanger() delegates to repository and maps result")
+    @DisplayName("listByMoneyChanger() should return mapped DTOs by moneyChangerId")
     void listByMoneyChangerReturnsMappedDtos() {
         int mcId = 99;
         List<Transaction> entities = List.of(entity(10));
         when(repository.findByMoneyChangerId(mcId)).thenReturn(entities);
 
-        mapperMock.when(() -> TransactionMapper.toDto(entities.get(0)))
-                  .thenReturn(dto(10));
+        mapperMock.when(() -> TransactionMapper.toDto(entities.get(0))).thenReturn(dto(10));
 
         List<TransactionDto> result = service.listByMoneyChanger(mcId);
 
-        assertThat(result).singleElement()
-                          .extracting(TransactionDto::getId)
-                          .isEqualTo(10);
+        assertThat(result)
+                .singleElement()
+                .extracting(TransactionDto::getId)
+                .isEqualTo(10);
 
         verify(repository).findByMoneyChangerId(mcId);
         mapperMock.verify(() -> TransactionMapper.toDto(entities.get(0)));
     }
+
     /* ------------------------------------------------------------------
- * Tests for updateTransactionStatus(...)
- * ------------------------------------------------------------------ */
+     * Tests for updateTransactionStatus(...)
+     * ------------------------------------------------------------------ */
 
-@Test
-@DisplayName("updateTransactionStatus() returns mapped DTO when row updated")
-void updateStatusSuccess() {
-    // Arrange
-    int id = 1;
-    String status = "COMPLETED";
-    int userId = 9;
+    @Test
+    @DisplayName("updateTransactionStatus() should return mapped DTO when update succeeds")
+    void updateStatusSuccess() {
+        int id = 1;
+        String status = "COMPLETED";
+        String comments = "Customer did not show up.";
+        int userId = 9;
 
-    Transaction entity = entity(id);              // helper from the class
-    entity.setCurrentStatus(status);
+        Transaction entity = entity(id);
+        entity.setCurrentStatus(status);
 
-    when(repository.updateStatus(id, status, userId)).thenReturn(1);
-    when(repository.getReferenceById(id)).thenReturn(entity);
+        when(repository.updateStatus(id, status, comments, userId)).thenReturn(1);
+        when(repository.getReferenceById(id)).thenReturn(entity);
 
-    TransactionDto expectedDto = dto(id);         // helper from the class
-    expectedDto.setCurrentStatus(status);
+        TransactionDto expectedDto = dto(id);
+        expectedDto.setCurrentStatus(status);
 
-    mapperMock.when(() -> TransactionMapper.toDto(entity))
-              .thenReturn(expectedDto);
+        mapperMock.when(() -> TransactionMapper.toDto(entity)).thenReturn(expectedDto);
 
-    // Act
-    TransactionDto result = service.updateTransactionStatus(id, status, userId);
+        TransactionDto result = service.updateTransactionStatus(id, status, comments, userId);
 
-    // Assert
-    assertThat(result.getId()).isEqualTo(id);
-    assertThat(result.getCurrentStatus()).isEqualTo(status);
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(id);
+        assertThat(result.getCurrentStatus()).isEqualTo(status);
 
-    verify(repository).updateStatus(id, status, userId);
-    verify(repository).getReferenceById(id);
-    mapperMock.verify(() -> TransactionMapper.toDto(entity));
-}
+        verify(repository).updateStatus(id, status, comments, userId);
+        verify(repository).getReferenceById(id);
+        mapperMock.verify(() -> TransactionMapper.toDto(entity));
+    }
 
-@Test
-@DisplayName("updateTransactionStatus() throws when no rows updated")
-void updateStatusNotFound() {
-    when(repository.updateStatus(anyInt(), anyString(), anyInt()))
-            .thenReturn(0);                       // simulate missing record
+    @Test
+    @DisplayName("updateTransactionStatus() should throw if no rows updated")
+    void updateStatusNotFound() {
+        when(repository.updateStatus(anyInt(), anyString(), anyString(), anyInt())).thenReturn(0);
 
-    assertThatThrownBy(() -> service.updateTransactionStatus(42, "CANCELLED", 9))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("42");
+        assertThatThrownBy(() -> service.updateTransactionStatus(42, "CANCELLED", "No response", 9))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("42");
 
-    verify(repository, never()).getReferenceById(anyInt());
-    mapperMock.verifyNoInteractions();            // mapper never called
-}
-
+        verify(repository).updateStatus(42, "CANCELLED", "No response", 9);
+        verify(repository, never()).getReferenceById(anyInt());
+        mapperMock.verifyNoInteractions();
+    }
 }
