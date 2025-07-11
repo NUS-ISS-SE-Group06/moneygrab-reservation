@@ -1,0 +1,33 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/reservationdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
+    show-sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 2GB
+      max-request-size: 2GB
+
+  devtools:
+    restart:
+      enabled: true
+
+logging:
+  config: classpath:log4j2-dev.xml
+
+cors:
+  enabled: true
+  allowed-origins: http://localhost:3000,http://yourdomain.com
