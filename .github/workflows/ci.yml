@@ -122,13 +122,22 @@ jobs:
 
       - name: Start Spring Boot App
         run: |
-          java -jar target/*.jar &
+          java -jar target/*.jar > app.log 2>&1 &
           echo "Waiting for app to start on port 8688..."
           for i in {1..30}; do
-            nc -z localhost 8688 && echo "App is up!" && break
-            echo "Waiting..."
-            sleep 2
+            if nc -z localhost 8688; then
+              echo "App is up!" 
+              break
+            fi
+              echo "Waiting..."
+              sleep 2
           done
+
+          if ! nc -z localhost 8688; then
+            echo "App failed to start in time. Dumping logs:"
+            cat app.log
+            exit 1
+          fi
 
       - name: Install Node.js
         uses: actions/setup-node@v4
