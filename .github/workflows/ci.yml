@@ -48,7 +48,6 @@ jobs:
     name: Unit Test
     needs: test_build
     runs-on: ubuntu-latest
-
     services:
       mysql:
         image: mysql:8
@@ -94,113 +93,113 @@ jobs:
       - name: Run Unit Test
         run: mvn -B test
 
-    newman_test:
-      name: Newman API Tests
-      needs: unit_test
-      runs-on: ubuntu-latest
-      services:
-        mysql:
-          image: mysql:8
-          ports:
-            - 3306:3306
-          env:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: testdb
-            MYSQL_USER: testuser
-            MYSQL_PASSWORD: testpass
-          options: >-
-            --health-cmd="mysqladmin ping --silent"
-            --health-interval=10s
-            --health-timeout=5s
-            --health-retries=5
+  newman_test:
+    name: Newman API Tests
+    needs: unit_test
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
-      env:
-        DB_USERNAME: testuser
-        DB_PASSWORD: testpass
-        DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
-        SPRING_DATASOURCE_USERNAME: testuser
-        SPRING_DATASOURCE_PASSWORD: testpass
-        SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb
+    env:
+      DB_USERNAME: testuser
+      DB_PASSWORD: testpass
+      DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
+      SPRING_DATASOURCE_USERNAME: testuser
+      SPRING_DATASOURCE_PASSWORD: testpass
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb
 
-      steps:
-        - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Set up JDK
-          uses: actions/setup-java@v4
-          with:
-            java-version: '21'
-            distribution: 'temurin'
-            cache: maven
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
 
-        - name: Cache Maven Dependencies
-          uses: actions/cache@v4
-          with:
-            path: |
-              ~/.m2
-            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-            restore-keys: ${{ runner.os }}-m2
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-        - name: Build Spring Boot Project
-          run: mvn clean package -DskipTests
+      - name: Build Spring Boot Project
+        run: mvn clean package -DskipTests
 
-        - name: Wait for MySQL to be ready
-          run: |
-            echo "Waiting for MySQL to be ready..."
-            for i in {1..30}; do
-              if mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass --silent; then
-                echo "✅ MySQL is up!"
-                break
-              fi
-              echo "⏳ ($i) Waiting for MySQL..."
-              sleep 2
-            done
-
-            if ! mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass --silent; then
-              echo "❌ MySQL not ready after 60s"
-              exit 1
+      - name: Wait for MySQL to be ready
+        run: |
+          echo "Waiting for MySQL to be ready..."
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass --silent; then
+              echo "✅ MySQL is up!"
+              break
             fi
+            echo "⏳ ($i) Waiting for MySQL..."
+            sleep 2
+          done
 
-        - name: Start Spring Boot App
-          run: |
-            echo "Starting Spring Boot app..."
-            java -jar target/*.jar > app.log 2>&1 &
+          if ! mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass --silent; then
+            echo "❌ MySQL not ready after 60s"
+            exit 1
+          fi
 
-            echo "Waiting for app to respond on http://localhost:8688/api/v1/transactions..."
-            for i in {1..60}; do
-              if curl -s --head http://localhost:8688/api/v1/transactions | grep "200 OK" > /dev/null; then
-                echo "✅ App is responding!"
-                break
-              fi
-              echo "⏳ ($i) Waiting for HTTP 200 OK..."
-              sleep 2
-            done
+      - name: Start Spring Boot App
+        run: |
+          echo "Starting Spring Boot app..."
+          java -jar target/*.jar > app.log 2>&1 &
 
-            if ! curl -s --head http://localhost:8688/api/v1/transactions | grep "200 OK" > /dev/null; then
-              echo "❌ App failed to respond in time. Dumping logs:"
-              cat app.log
-              exit 1
+          echo "Waiting for app to respond on http://localhost:8688/api/v1/transactions..."
+          for i in {1..60}; do
+            if curl -s --head http://localhost:8688/api/v1/transactions | grep "200 OK" > /dev/null; then
+              echo "✅ App is responding!"
+              break
             fi
+            echo "⏳ ($i) Waiting for HTTP 200 OK..."
+            sleep 2
+          done
 
-        - name: Install Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: '20'
+          if ! curl -s --head http://localhost:8688/api/v1/transactions | grep "200 OK" > /dev/null; then
+            echo "❌ App failed to respond in time. Dumping logs:"
+            cat app.log
+            exit 1
+          fi
 
-        - name: Install Newman
-          run: npm install -g newman
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-        - name: Run Postman Tests with Newman
-          run: |
-            newman run postman/moneygrab.postman_collection.json \
-              --environment postman/moneygrab.environment.json \
-              --reporters cli,json \
-              --reporter-json-export newman-report.json
+      - name: Install Newman
+        run: npm install -g newman
 
-        - name: Upload Newman Report
-          uses: actions/upload-artifact@v4
-          with:
-            name: newman-report
-            path: newman-report.json
+      - name: Run Postman Tests with Newman
+        run: |
+          newman run postman/moneygrab.postman_collection.json \
+            --environment postman/moneygrab.environment.json \
+            --reporters cli,json \
+            --reporter-json-export newman-report.json
+
+      - name: Upload Newman Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman-report.json
 
   code_scan:
     name: Code Quality Scan
