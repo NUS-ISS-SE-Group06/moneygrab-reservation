@@ -104,7 +104,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
+          MYSQL_DATABASE: reservationdb
           MYSQL_USER: testuser
           MYSQL_PASSWORD: testpass
         options: >-
@@ -116,10 +116,10 @@ jobs:
     env:
       DB_USERNAME: testuser
       DB_PASSWORD: testpass
-      DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
+      DB_URL: jdbc:mysql://127.0.0.1:3306/reservationdb
       SPRING_DATASOURCE_USERNAME: testuser
       SPRING_DATASOURCE_PASSWORD: testpass
-      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/reservationdb
 
     steps:
       - uses: actions/checkout@v4
@@ -138,6 +138,12 @@ jobs:
             ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
+
+      - name: Create DB schema
+        run: |
+          echo "Creating schema from reservation_schema.sql..."
+          mysql -h 127.0.0.1 -u testuser -ptestpass testdb < resources/dbscript/reservation_schema.sql
+
 
       - name: Build Spring Boot Project
         run: mvn clean package -DskipTests
