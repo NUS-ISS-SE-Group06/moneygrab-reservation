@@ -105,7 +105,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
+          MYSQL_DATABASE: reservationdb
           MYSQL_USER: testuser
           MYSQL_PASSWORD: testpass
         options: >-
@@ -119,8 +119,8 @@ jobs:
       DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
       SPRING_DATASOURCE_USERNAME: testuser
       SPRING_DATASOURCE_PASSWORD: testpass
-      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb
-      
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/reservationdb
+
     steps:
       - uses: actions/checkout@v4
 
