@@ -65,9 +65,6 @@ jobs:
           --health-retries=5
 
     env:
-      DB_USERNAME: testuser
-      DB_PASSWORD: testpass
-      DB_URL: jdbc:mysql://127.0.0.1:3306/testdb
       SPRING_DATASOURCE_USERNAME: testuser
       SPRING_DATASOURCE_PASSWORD: testpass
       SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb
@@ -105,7 +102,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: reservationdb
-        
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -113,9 +109,6 @@ jobs:
           --health-retries=5
 
     env:
-      DB_USERNAME: root
-      DB_PASSWORD: root
-      DB_URL: jdbc:mysql://127.0.0.1:3306/reservationdb
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/reservationdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -138,9 +131,9 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Create DB schema
+      - name: Create DB schema and insert initial data
         run: |
-          echo "⏳ Waiting for MySQL to be ready before running schema..."
+          echo "⏳ Waiting for MySQL to be ready before initializing DB..."
           for i in {1..30}; do
             if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
               echo "✅ MySQL is ready!"
@@ -158,44 +151,11 @@ jobs:
           echo "🚀 Creating schema from reservation_schema.sql..."
           mysql -h 127.0.0.1 -uroot -proot reservationdb < ./resources/dbscript/reservation_schema.sql
 
-          echo "✅ Schema applied. Verifying table existence..."
-          mysql -h 127.0.0.1 -uroot -proot -e "USE reservationdb; SHOW TABLES;"
-
-      - name: Insert initial data into DB
-        run: |
           echo "📦 Inserting initial data from reservation_data.sql..."
-
-          # Enable MySQL to stop on error
           mysql --show-warnings --verbose --force -h 127.0.0.1 -uroot -proot reservationdb < ./resources/dbscript/reservation_data.sql
-
-          # Check if previous command succeeded
-          if [ $? -ne 0 ]; then
-            echo "❌ Failed to insert initial data!"
-            exit 1
-          fi
-
-          echo "✅ Data inserted successfully."
-
 
       - name: Build Spring Boot Project
         run: mvn clean package -DskipTests
-
-      - name: Wait for MySQL to be ready
-        run: |
-          echo "Waiting for MySQL to be ready..."
-          for i in {1..30}; do
-            if mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass --silent; then
-              echo "✅ MySQL is up!"
-              break
-            fi
-            echo "⏳ ($i) Waiting for MySQL..."
-            sleep 2
-          done
-
-          if ! mysqladmin ping -h 127.0.0.1 -u testuser --password=testpass --silent; then
-            echo "❌ MySQL not ready after 60s"
-            exit 1
-          fi
 
       - name: Start Spring Boot App
         run: |
