@@ -140,8 +140,41 @@ jobs:
 
       - name: Create DB schema
         run: |
-          echo "Creating schema from reservation_schema.sql..."
-          mysql -h 127.0.0.1 -u root -proot reservationdb < ./resources/dbscript/reservation_schema.sql
+          echo "⏳ Waiting for MySQL to be ready before running schema..."
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
+              echo "✅ MySQL is ready!"
+              break
+            fi
+            echo "⏳ ($i) Waiting for MySQL..."
+            sleep 2
+          done
+
+          if ! mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
+            echo "❌ MySQL did not become ready. Exiting."
+            exit 1
+          fi
+
+          echo "🚀 Creating schema from reservation_schema.sql..."
+          mysql -h 127.0.0.1 -uroot -proot reservationdb < ./resources/dbscript/reservation_schema.sql
+
+          echo "✅ Schema applied. Verifying table existence..."
+          mysql -h 127.0.0.1 -uroot -proot -e "USE reservationdb; SHOW TABLES;"
+
+      - name: Insert initial data into DB
+        run: |
+          echo "📦 Inserting initial data from reservation_data.sql..."
+
+          # Enable MySQL to stop on error
+          mysql --show-warnings --verbose --force -h 127.0.0.1 -uroot -proot reservationdb < ./resources/dbscript/reservation_data.sql
+
+          # Check if previous command succeeded
+          if [ $? -ne 0 ]; then
+            echo "❌ Failed to insert initial data!"
+            exit 1
+          fi
+
+          echo "✅ Data inserted successfully."
 
 
       - name: Build Spring Boot Project
