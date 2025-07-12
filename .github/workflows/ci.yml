@@ -105,8 +105,7 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: reservationdb
-          MYSQL_USER: testuser
-          MYSQL_PASSWORD: testpass
+        
         options: >-
           --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
@@ -114,12 +113,12 @@ jobs:
           --health-retries=5
 
     env:
-      DB_USERNAME: testuser
-      DB_PASSWORD: testpass
+      DB_USERNAME: root
+      DB_PASSWORD: root
       DB_URL: jdbc:mysql://127.0.0.1:3306/reservationdb
-      SPRING_DATASOURCE_USERNAME: testuser
-      SPRING_DATASOURCE_PASSWORD: testpass
-      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/reservationdb
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/reservationdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
 
     steps:
       - uses: actions/checkout@v4
@@ -142,7 +141,7 @@ jobs:
       - name: Create DB schema
         run: |
           echo "Creating schema from reservation_schema.sql..."
-          mysql -h 127.0.0.1 -u testuser -ptestpass reservationdb < ./resources/dbscript/reservation_schema.sql
+          mysql -h 127.0.0.1 -u root -proot reservationdb < ./resources/dbscript/reservation_schema.sql
 
 
       - name: Build Spring Boot Project
