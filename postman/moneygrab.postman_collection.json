@@ -1,0 +1,240 @@
+{
+	"info": {
+		"_postman_id": "5c9dbb67-68fa-4be8-ae92-8793e439b8f4",
+		"name": "MoneyGrab",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "14258588",
+		"_collection_link": "https://yale-nus.postman.co/workspace/My-Workspace~5c840669-1524-4440-89b2-db2584a56355/collection/14258588-5c9dbb67-68fa-4be8-ae92-8793e439b8f4?action=share&source=collection_link&creator=14258588"
+	},
+	"item": [
+		{
+			"name": "List Moneychanger Transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.eql(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response is an array with at least one element\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Validate the schema of each transaction object in the response\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array');",
+							"    responseData.forEach(function(transaction) {",
+							"        pm.expect(transaction).to.be.an('object');",
+							"        pm.expect(transaction).to.have.all.keys(",
+							"            'id', 'transactionDate', 'customerId', 'customerName', ",
+							"            'moneyChangerId', 'moneyChanger', 'currencyId', ",
+							"            'currency', 'currentStatus', 'email', ",
+							"            'comments', 'exchangeRate', 'foreignAmount', ",
+							"            'sgdAmount', 'receivedCash', 'createdAt', ",
+							"            'updatedAt', 'createdBy', 'updatedBy'",
+							"        );",
+							"        pm.expect(transaction.id).to.be.a('number');",
+							"        pm.expect(transaction.transactionDate).to.be.a('string');",
+							"        pm.expect(transaction.customerId).to.be.a('number');",
+							"        pm.expect(transaction.customerName).to.satisfy(function(value) {",
+							"            return value === null || typeof value === 'string';",
+							"        });",
+							"        pm.expect(transaction.moneyChangerId).to.be.a('number');",
+							"        pm.expect(transaction.moneyChanger).to.satisfy(function(value) {",
+							"            return value === null || typeof value === 'string';",
+							"        });",
+							"        pm.expect(transaction.currencyId).to.be.a('number');",
+							"        pm.expect(transaction.currency).to.satisfy(function(value) {",
+							"            return value === null || typeof value === 'string';",
+							"        });",
+							"        pm.expect(transaction.currentStatus).to.be.a('string');",
+							"        pm.expect(transaction.email).to.be.a('string').that.matches(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);",
+							"        pm.expect(transaction.comments).to.satisfy(function(value) {",
+							"            return value === null || typeof value === 'string';",
+							"        });",
+							"        pm.expect(transaction.exchangeRate).to.be.a('number');",
+							"        pm.expect(transaction.foreignAmount).to.be.a('number');",
+							"        pm.expect(transaction.sgdAmount).to.be.a('number');",
+							"        pm.expect(transaction.receivedCash).to.be.a('number');",
+							"        pm.expect(transaction.createdAt).to.be.a('string');",
+							"        pm.expect(transaction.updatedAt).to.be.a('string');",
+							"        pm.expect(transaction.createdBy).to.be.a('number');",
+							"        pm.expect(transaction.updatedBy).to.be.a('number');",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Transaction date is in a valid date format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"    ",
+							"    responseData.forEach(transaction => {",
+							"        pm.expect(transaction.transactionDate).to.exist;",
+							"        pm.expect(new Date(transaction.transactionDate).getTime()).to.not.be.NaN;",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8688/api/v1/moneychanger/1/transactions"
+			},
+			"response": []
+		},
+		{
+			"name": "List Transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response time is less than 200ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(200);",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response is an array with at least one element\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"});",
+							"",
+							"",
+							"pm.test(\"Response is an array of transaction objects with valid schema\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    pm.expect(responseData).to.be.an('array').that.is.not.empty;",
+							"",
+							"    responseData.forEach(function(transaction) {",
+							"        pm.expect(transaction).to.be.an('object');",
+							"        pm.expect(transaction).to.have.all.keys(",
+							"            'id', 'transactionDate', 'customerId', 'customerName', ",
+							"            'moneyChangerId', 'moneyChanger', 'currencyId', ",
+							"            'currency', 'currentStatus', 'email', 'comments', ",
+							"            'exchangeRate', 'foreignAmount', 'sgdAmount', ",
+							"            'receivedCash', 'createdAt', 'updatedAt', ",
+							"            'createdBy', 'updatedBy'",
+							"        );",
+							"",
+							"        pm.expect(transaction.id).to.be.a('number');",
+							"        pm.expect(transaction.transactionDate).to.be.a('string');",
+							"        pm.expect(transaction.customerId).to.be.a('number');",
+							"        pm.expect(transaction.customerName).to.satisfy(function(name) {",
+							"            return name === null || typeof name === 'string';",
+							"        });",
+							"        pm.expect(transaction.moneyChangerId).to.be.a('number');",
+							"        pm.expect(transaction.moneyChanger).to.satisfy(function(changer) {",
+							"            return changer === null || typeof changer === 'string';",
+							"        });",
+							"        pm.expect(transaction.currencyId).to.be.a('number');",
+							"        pm.expect(transaction.currency).to.satisfy(function(curr) {",
+							"            return curr === null || typeof curr === 'string';",
+							"        });",
+							"        pm.expect(transaction.currentStatus).to.be.a('string');",
+							"        pm.expect(transaction.email).to.be.a('string').that.matches(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);",
+							"        pm.expect(transaction.comments).to.satisfy(function(comment) {",
+							"            return comment === null || typeof comment === 'string';",
+							"        });",
+							"        pm.expect(transaction.exchangeRate).to.be.a('number');",
+							"        pm.expect(transaction.foreignAmount).to.be.a('number');",
+							"        pm.expect(transaction.sgdAmount).to.be.a('number');",
+							"        pm.expect(transaction.receivedCash).to.be.a('number');",
+							"        pm.expect(transaction.createdAt).to.be.a('string');",
+							"        pm.expect(transaction.updatedAt).to.be.a('string');",
+							"        pm.expect(transaction.createdBy).to.be.a('number');",
+							"        pm.expect(transaction.updatedBy).to.be.a('number');",
+							"    });",
+							"});",
+							"",
+							"",
+							"pm.test(\"Transaction date is in a valid date format\", function () {",
+							"    const responseData = pm.response.json();",
+							"    ",
+							"    responseData.forEach(function(transaction) {",
+							"        pm.expect(transaction.transactionDate).to.exist;",
+							"        pm.expect(new Date(transaction.transactionDate).getTime()).to.not.be.NaN;",
+							"    });",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8688/api/v1/transactions"
+			},
+			"response": []
+		}
+		
+	]
+}
