@@ -94,63 +94,62 @@ jobs:
       - name: Run Unit Test
         run: mvn -B test
 
-    newman_test:
-      name: Newman API Tests
-      needs: unit_test
-      runs-on: ubuntu-latest
+  newman_test:
+    name: Newman API Tests
+    needs: unit_test
+    runs-on: ubuntu-latest
 
-      steps:
-        - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-        - name: Set up JDK
-          uses: actions/setup-java@v4
-          with:
-            java-version: '21'
-            distribution: 'temurin'
-            cache: maven
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
 
-        - name: Cache Maven Dependencies
-          uses: actions/cache@v4
-          with:
-            path: |
-              ~/.m2
-            key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-            restore-keys: ${{ runner.os }}-m2
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-        - name: Build Spring Boot Project
-          run: mvn clean package -DskipTests
+      - name: Build Spring Boot Project
+        run: mvn clean package -DskipTests
 
-        - name: Start Spring Boot App
-          run: |
-            java -jar target/*.jar &
-            echo "Waiting for app to start on port 8688..."
-            for i in {1..30}; do
-              nc -z localhost 8688 && echo "App is up!" && break
-              echo "Waiting..."
-              sleep 2
-            done
+      - name: Start Spring Boot App
+        run: |
+          java -jar target/*.jar &
+          echo "Waiting for app to start on port 8688..."
+          for i in {1..30}; do
+            nc -z localhost 8688 && echo "App is up!" && break
+            echo "Waiting..."
+            sleep 2
+          done
 
-        - name: Install Node.js
-          uses: actions/setup-node@v4
-          with:
-            node-version: '20'
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-        - name: Install Newman
-          run: npm install -g newman
+      - name: Install Newman
+        run: npm install -g newman
 
-        - name: Run Postman Tests with Newman
-          run: |
-            newman run postman/moneygrab.postman_collection.json \
-              --environment postman/moneygrab.environment.json \
-              --reporters cli,json \
-              --reporter-json-export newman-report.json
+      - name: Run Postman Tests with Newman
+        run: |
+          newman run postman/moneygrab.postman_collection.json \
+            --environment postman/moneygrab.environment.json \
+            --reporters cli,json \
+            --reporter-json-export newman-report.json
 
-        - name: Upload Newman Report
-          uses: actions/upload-artifact@v4
-          with:
-            name: newman-report
-            path: newman-report.json
-
+      - name: Upload Newman Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman-report.json
 
   code_scan:
     name: Code Quality Scan
