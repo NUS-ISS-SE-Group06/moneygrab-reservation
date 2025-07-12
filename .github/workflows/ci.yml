@@ -142,7 +142,7 @@ jobs:
       - name: Create DB schema
         run: |
           echo "Creating schema from reservation_schema.sql..."
-          mysql -h 127.0.0.1 -u testuser -ptestpass testdb < /resources/dbscript/reservation_schema.sql
+          mysql -h 127.0.0.1 -u testuser -ptestpass testdb < ./resources/dbscript/reservation_schema.sql
 
 
       - name: Build Spring Boot Project
