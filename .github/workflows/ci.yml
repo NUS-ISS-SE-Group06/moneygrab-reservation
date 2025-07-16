@@ -159,8 +159,8 @@ jobs:
 
       - name: Start Spring Boot App
         run: |
-          echo "Starting Spring Boot app..."
-          java -jar target/*.jar > app.log 2>&1 &
+          echo "Starting Spring Boot app on port 8688..."
+          java -jar target/*.jar --server.port=8688 > app.log 2>&1 &
 
           echo "Waiting for app to respond on http://localhost:8688/api/v1/transactions..."
           for i in {1..60}; do
@@ -198,6 +198,10 @@ jobs:
         with:
           name: newman-report
           path: newman-report.json
+
+      - name: Dump Spring Boot logs on failure
+        if: failure()
+        run: cat app.log
 
   code_scan:
     name: Code Quality Scan
