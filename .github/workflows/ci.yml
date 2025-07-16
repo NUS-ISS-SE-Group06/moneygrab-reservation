@@ -36,8 +36,7 @@ jobs:
       - name: Cache Maven Dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.m2
+          path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
@@ -82,8 +81,7 @@ jobs:
       - name: Cache Maven Dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.m2
+          path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
@@ -126,8 +124,7 @@ jobs:
       - name: Cache Maven Dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.m2
+          path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
@@ -188,10 +185,17 @@ jobs:
 
       - name: Run Postman Tests with Newman
         run: |
+          echo "🧪 Running Postman tests..."
+          ls -la postman
+          cat postman/moneygrab.postman_collection.json | head -n 20 || echo "❌ Collection missing or unreadable"
           newman run postman/moneygrab.postman_collection.json \
             --environment postman/moneygrab.environment.json \
             --reporters cli,json \
-            --reporter-json-export newman-report.json
+            --reporter-json-export newman-report.json \
+            --verbose || {
+              echo "❌ Newman test failed"
+              exit 1
+            }
 
       - name: Upload Newman Report
         uses: actions/upload-artifact@v4
@@ -199,9 +203,12 @@ jobs:
           name: newman-report
           path: newman-report.json
 
-      - name: Dump Spring Boot logs on failure
-        if: failure()
-        run: cat app.log
+      - name: Upload Spring Boot Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-boot-log
+          path: app.log
 
   code_scan:
     name: Code Quality Scan
