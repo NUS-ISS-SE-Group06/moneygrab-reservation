@@ -112,4 +112,35 @@ class ReservationControllerTest {
 
         verify(service).delete(77);
     }
+
+    @Test
+    void update_valid_returns200() throws Exception {
+        ReservationDTO inputDto = new ReservationDTO();
+        inputDto.setId(10);
+        inputDto.setCustomerId(1);
+        inputDto.setMoneyChangerId(5);
+        inputDto.setCurrencyId(3);
+        inputDto.setExchangeRate(new BigDecimal("1.2345"));
+        inputDto.setForeignAmount(new BigDecimal("100"));
+        inputDto.setSgdAmount(new BigDecimal("123.45"));
+        inputDto.setStatus("PENDING");
+        inputDto.setExpiresAt(new Timestamp(System.currentTimeMillis()));
+
+        Reservation entity = new Reservation();
+        Reservation saved = new Reservation();
+        saved.setId(10);
+
+        ReservationDTO responseDto = new ReservationDTO();
+        responseDto.setId(10);
+
+        when(mapper.toEntity(inputDto)).thenReturn(entity);
+        when(service.save(entity)).thenReturn(saved);
+        when(mapper.toDTO(saved)).thenReturn(responseDto);
+
+        mockMvc.perform(put("/v1/reservations/10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(inputDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(10));
+    }
 }
