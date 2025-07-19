@@ -4,7 +4,7 @@ import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.service.TransactionService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import org.springframework.http.MediaType;
 
 import static org.mockito.Mockito.when;
 
@@ -14,6 +14,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -37,8 +38,13 @@ class TransactionControllerTest {
         dto.setId(id);
         dto.setMoneyChangerId(100);
         dto.setTransactionDate(new Timestamp(System.currentTimeMillis()));
+        dto.setCurrentStatus("PENDING"); // added field for test validation
         return dto;
     }
+
+    /* ------------------------------------------------------------------
+     * Tests for GET endpoints
+     * ------------------------------------------------------------------ */
 
     @Test
     @DisplayName("GET /v1/transactions returns list of all transactions")
@@ -62,24 +68,40 @@ class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }
-    @Test
+
+    /* ------------------------------------------------------------------
+     * Tests for PATCH /status update
+     * ------------------------------------------------------------------ */
+
+ @Test
 @DisplayName("PATCH /v1/transactions/{id}/status updates status")
 void testUpdateTransactionStatus() throws Exception {
     int id = 1;
     String newStatus = "COMPLETED";
     int userId = 9;
+    String comments = "Customer did not show up.";
 
     TransactionDto updated = mockDto(id);
     updated.setCurrentStatus(newStatus);
 
-    when(service.updateTransactionStatus(id, newStatus, userId))
+    // JSON request body
+    String requestBody = """
+        {
+          "status": "%s",
+          "comment": "%s",
+          "userId": %d
+        }
+        """.formatted(newStatus, comments, userId);
+
+    when(service.updateTransactionStatus(id, newStatus, comments, userId))
             .thenReturn(updated);
 
     mockMvc.perform(patch("/v1/transactions/{id}/status", id)
-                    .param("status", newStatus)
-                    .param("userId", String.valueOf(userId)))
-           .andExpect(status().isOk())
-           .andExpect(jsonPath("$.id").value(id))
-           .andExpect(jsonPath("$.currentStatus").value(newStatus));
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(requestBody))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(id))
+            .andExpect(jsonPath("$.currentStatus").value(newStatus));
 }
+
 }

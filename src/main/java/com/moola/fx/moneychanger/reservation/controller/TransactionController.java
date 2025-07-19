@@ -1,6 +1,7 @@
 package com.moola.fx.moneychanger.reservation.controller;
 
 import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
+import com.moola.fx.moneychanger.reservation.dto.TransactionStatusUpdateRequestDto;
 import com.moola.fx.moneychanger.reservation.service.TransactionService;
 
 import jakarta.validation.Valid;
@@ -58,15 +59,21 @@ public class TransactionController {
 @PatchMapping("/transactions/{id}/status")
 public ResponseEntity<TransactionDto> updateTransactionStatus(
         @PathVariable int id,
-        @RequestParam String status,
-        @RequestParam int userId) {
+        @RequestBody TransactionStatusUpdateRequestDto request) {
 
-    if (status.isBlank() || userId <= 0) {
+    if (request.getStatus() == null || request.getStatus().isBlank() || request.getUserId() <= 0) {
         return ResponseEntity.badRequest().build();
     }
 
-    TransactionDto dto = service.updateTransactionStatus(id, status, userId);
+    TransactionDto dto = service.updateTransactionStatus(
+        id,
+        request.getStatus(),
+        request.getComment(),
+        request.getUserId()
+    );
+
     return ResponseEntity.ok(dto);
 }
+
 
 }
