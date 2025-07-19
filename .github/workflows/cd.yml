@@ -1,0 +1,71 @@
+name: Deploy to EC2 using CodeDeploy
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  build-and-deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Still good practice to specify minimal permissions for checkout
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven # Cache Maven dependencies for faster builds
+
+      - name: Build JAR with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Prepare Deployment Package
+        run: |
+          echo "Preparing deployment package moneygrab-reservation"
+          mkdir -p deploy-package/scripts
+          mkdir -p deploy-package/build
+          mkdir -p deploy-package/log
+          cp deployment/appspec.yml deploy-package/
+          cp deployment/scripts/*.sh deploy-package/scripts/
+          cp target/moneychanger-reservation-1.0.0-SNAPSHOT.jar deploy-package/build/moneychanger-reservation-1.0.0-SNAPSHOT.jar
+
+      - name: Set Executable Permissions
+        run: chmod +x deploy-package/scripts/*.sh
+
+      - name: Zip App for Deployment
+        id: zip_bundle
+        run: |
+          # Use a unique key for the S3 bundle to avoid conflicts and ensure fresh deployments
+          ZIP_FILE_NAME="app-${{ github.sha }}.zip" # Unique based on commit SHA
+          cd deploy-package
+          zip -r $ZIP_FILE_NAME .
+          echo "ZIP_FILE_NAME=$ZIP_FILE_NAME" >> $GITHUB_OUTPUT # Store for later use
+
+      - name: Upload ZIP to S3
+        run: |
+          aws s3 cp deploy-package/${{ steps.zip_bundle.outputs.ZIP_FILE_NAME }} s3://${{ secrets.S3_BUCKET }}/moneygrab-reservation/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-southeast-1
+
+      - name: Deploy to EC2 via CodeDeploy
+        run: |
+          aws deploy create-deployment \
+            --application-name MoneyGrab_Deployment \
+            --deployment-group-name MoneyGrab_EC2_Reservation \
+            --s3-location bucket=${{ secrets.S3_BUCKET }},bundleType=zip,key=moneygrab-reservation/${{ steps.zip_bundle.outputs.ZIP_FILE_NAME }} \
+            --deployment-config-name CodeDeployDefault.AllAtOnce \
+            --region ap-southeast-1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ap-southeast-1
