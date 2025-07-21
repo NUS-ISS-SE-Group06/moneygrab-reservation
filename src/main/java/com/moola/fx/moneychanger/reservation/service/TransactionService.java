@@ -12,6 +12,7 @@ public  interface TransactionService{
     List <TransactionDto> listAll();
     List <TransactionDto> listByMoneyChanger(int moneyChangerId);
     TransactionDto updateTransactionStatus(int id, String status,int userid);
+    TransactionDto createTransaction(TransactionDto transactionDto);
 
 }
 
