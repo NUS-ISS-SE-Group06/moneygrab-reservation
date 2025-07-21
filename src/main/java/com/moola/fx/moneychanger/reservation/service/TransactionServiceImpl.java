@@ -38,9 +38,9 @@ public class TransactionServiceImpl implements TransactionService {
 
   @Override
     @Transactional   // only the 2nd call is read-only
-    public TransactionDto updateTransactionStatus(int id, String status, int userId) {
+    public TransactionDto updateTransactionStatus(int id, String status,String comments, int userId) {
 
-        int rows = repository.updateStatus(id, status, userId);
+        int rows = repository.updateStatus(id, status, comments, userId);
         if (rows == 0) {
             throw new EntityNotFoundException("Transaction " + id);
         }

@@ -19,8 +19,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     @Query("""
            update Transaction t
               set t.currentStatus = :status,
+                  t.comments = :comments,
                   t.updatedBy     = :userId
             where t.id           = :id
            """)
-    int updateStatus(int id, String status, int userId);
+    int updateStatus(int id, String status,String comments, int userId);
 }
