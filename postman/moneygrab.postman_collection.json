@@ -8,7 +8,7 @@
 	},
 	"item": [
 		{
-			"name": "List Moneychanger Transaction",
+			"name": "List Moneychanger Transactions",
 			"event": [
 				{
 					"listen": "test",
@@ -26,8 +26,11 @@
 				{
 					"listen": "prerequest",
 					"script": {
-						"packages": {},
-						"type": "text/javascript"
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -55,12 +58,12 @@
 						}
 					}
 				},
-				"url": "http://localhost:8688/api/v1/transactions/moneyChanger/1"
+				"url": "http://localhost:8688/api/v1/transactions/moneyChanger/2"
 			},
 			"response": []
 		},
 		{
-			"name": "List Transaction",
+			"name": "List Transactions",
 			"event": [
 				{
 					"listen": "test",
@@ -105,7 +108,7 @@
 			"response": []
 		},
 		{
-			"name": "Update Statu",
+			"name": "Update Status",
 			"event": [
 				{
 					"listen": "test",
@@ -137,6 +140,76 @@
 					}
 				},
 				"url": "http://localhost:8688/api/v1/transactions/1/status"
+			},
+			"response": []
+		},
+		{
+			"name": "List Reservations",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"status\": \"Pending\",\n    \"comments\": \"XXXXXX - XXXXXX\",\n    \"userId\": 1\n}"
+				},
+				"url": "http://localhost:8688/api/v1/reservations"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Transaction",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {",
+							"    pm.expect(pm.response.code).to.equal(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"customerId\": 1,\n  \"moneyChangerId\": 2,\n  \"currencyId\": 3,\n  \"transactionDate\": \"2025-07-21T10:00:00\",\n  \"currentStatus\": \"PENDING\",\n  \"email\": \"john.doe@example.com\",\n  \"comments\": \"Initial booking\",\n  \"exchangeRate\": 1.35,\n  \"foreignAmount\": 100,\n  \"sgdAmount\": 135,\n  \"receivedCash\": 0,\n  \"createdBy\": 9,\n  \"updatedBy\": 9\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:8688/api/v1/transactions/create"
 			},
 			"response": []
 		}
