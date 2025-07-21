@@ -64,13 +64,13 @@ class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("GET /v1/transactions/{id} returns transactions for a money changer")
+    @DisplayName("GET /v1/transactions/moneyChanger/{id} returns transactions for a money changer")
     void testListByMoneyChanger() throws Exception {
         int moneyChangerId = 5;
         List<TransactionDto> mockList = List.of(mockDto(10));
         when(service.listByMoneyChanger(moneyChangerId)).thenReturn(mockList);
 
-        mockMvc.perform(get("/v1/transactions/{moneyChangerId}", moneyChangerId))
+        mockMvc.perform(get("/v1/transactions/moneyChanger/{moneyChangerId}", moneyChangerId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1));
     }

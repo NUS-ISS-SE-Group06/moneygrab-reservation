@@ -26,7 +26,7 @@ public class TransactionController {
     }
 
   
-    @GetMapping("/{moneyChangerId}")
+    @GetMapping("moneyChanger/{moneyChangerId}")
   public ResponseEntity<List<TransactionDto>> listByMoneyChanger(
             @PathVariable @Positive int moneyChangerId) {
 
