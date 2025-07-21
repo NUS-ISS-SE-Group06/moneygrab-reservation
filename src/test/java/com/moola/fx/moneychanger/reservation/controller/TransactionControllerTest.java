@@ -1,5 +1,6 @@
 package com.moola.fx.moneychanger.reservation.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.service.TransactionService;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(TransactionController.class)
@@ -28,6 +30,9 @@ class TransactionControllerTest {
 
     @MockitoBean
     private TransactionService service;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private TransactionDto mockDto(int id) {
         TransactionDto dto = new TransactionDto();
@@ -105,4 +110,24 @@ class TransactionControllerTest {
                 .andDo(result -> System.out.println("Response JSON: " + result.getResponse().getContentAsString()))
                 .andExpect(status().isOk());
     }
+
+    @Test
+@DisplayName("POST /v1/transactions/create creates a transaction successfully")
+void testCreateTransaction() throws Exception {
+    TransactionDto requestDto = mockDto(0); // ID not set yet
+    requestDto.setId(null); // Simulate creation request
+
+    TransactionDto savedDto = mockDto(1); // Simulate saved response with ID
+
+    when(service.createTransaction(requestDto)).thenReturn(savedDto);
+
+    mockMvc.perform(post("/v1/transactions/create")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requestDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.customerId").value(202))
+            .andExpect(jsonPath("$.currentStatus").value("PENDING"));
+}
+
 }
