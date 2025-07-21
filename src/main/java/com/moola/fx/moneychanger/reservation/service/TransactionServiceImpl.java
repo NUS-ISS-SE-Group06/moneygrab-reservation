@@ -2,7 +2,6 @@ package com.moola.fx.moneychanger.reservation.service;
 
 import com.moola.fx.moneychanger.reservation.dto.TransactionDto;
 import com.moola.fx.moneychanger.reservation.mapper.TransactionMapper;
-import com.moola.fx.moneychanger.reservation.model.Transaction;
 import com.moola.fx.moneychanger.reservation.repository.TransactionRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -38,9 +37,9 @@ public class TransactionServiceImpl implements TransactionService {
 
   @Override
     @Transactional   // only the 2nd call is read-only
-    public TransactionDto updateTransactionStatus(int id, String status, int userId) {
+    public TransactionDto updateTransactionStatus(int id, String status,String comments, int userId) {
 
-        int rows = repository.updateStatus(id, status, userId);
+        int rows = repository.updateStatus(id, status, comments, userId);
         if (rows == 0) {
             throw new EntityNotFoundException("Transaction " + id);
         }
