@@ -231,7 +231,7 @@
 						}
 					}
 				},
-				"url": "http://localhost:8688/api/v1/transactions/all"
+				"url": "http://localhost:8688/api/v1/transactions"
 			},
 			"response": []
 		},
