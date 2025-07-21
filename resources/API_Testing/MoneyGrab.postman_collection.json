@@ -310,7 +310,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"status\": \"Paid\",\n    \"comments\": \"XXXXXX - XXXXXX\",\n    \"userId\": 1\n}",
+					"raw": "{\n    \"status\": \"Pending\",\n    \"comments\": \"XXXXXX - XXXXXX\",\n    \"userId\": 1\n}",
 					"options": {
 						"raw": {
 							"language": "json"
