@@ -25,10 +25,7 @@ public class TransactionController {
         this.service = service;
     }
 
-    /**
-     * GET /moneychanger/{moneyChangerId}/transactions
-     * Returns all transactions as JSON for the moneychanger.
-     */
+  
     @GetMapping("/{moneyChangerId}")
   public ResponseEntity<List<TransactionDto>> listByMoneyChanger(
             @PathVariable @Positive int moneyChangerId) {
@@ -36,20 +33,13 @@ public class TransactionController {
         List<TransactionDto> tx = service.listByMoneyChanger(moneyChangerId);
         return ResponseEntity.ok(tx);           // 200 even if empty []
     }
-    /**
-     * GET /transactions
-     * Returns all transactions as JSON.
-     */
+   
     @GetMapping("/")
     public ResponseEntity<List<TransactionDto>> listAllTransactions() {
         List<TransactionDto> all = service.listAll();
         return ResponseEntity.ok(all);
     }
-    /**
-     * PATCH /v1/transactions/{id}/status
-     * Body: { "status": "COMPLETED" }
-     * Header X-User-Id: caller’s userId (for audit)
-     */
+    
 @PatchMapping("/{id}/status")
 public ResponseEntity<TransactionDto> updateTransactionStatus(
         @PathVariable int id,
