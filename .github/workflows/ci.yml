@@ -1,0 +1,249 @@
+name: CI - Java Test and Build
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - '.github/**'
+      - 'deployment/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'pom.xml'
+      - '.github/**'
+      - 'deployment/**'
+  workflow_dispatch:
+
+jobs:
+  test_build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build Project
+        run: mvn -B clean package -DskipTests
+
+  unit_test:
+    name: Unit Test
+    needs: test_build
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpass
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      SPRING_DATASOURCE_USERNAME: testuser
+      SPRING_DATASOURCE_PASSWORD: testpass
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/testdb
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run Unit Test
+        run: mvn -B test
+
+  newman_test:
+    name: Newman API Tests
+    needs: unit_test
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: reservationdb
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_DATASOURCE_URL: jdbc:mysql://127.0.0.1:3306/reservationdb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Create DB schema and insert initial data
+        run: |
+          echo "⏳ Waiting for MySQL to be ready before initializing DB..."
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
+              echo "✅ MySQL is ready!"
+              break
+            fi
+            echo "⏳ ($i) Waiting for MySQL..."
+            sleep 2
+          done
+
+          if ! mysqladmin ping -h 127.0.0.1 -uroot -proot --silent; then
+            echo "❌ MySQL did not become ready. Exiting."
+            exit 1
+          fi
+
+          echo "🏗️ Creating schema from reservation_schema.sql..."
+          mysql -h 127.0.0.1 -uroot -proot reservationdb < ./resources/dbscript/reservation_schema.sql
+
+          echo "📊 Inserting initial data from reservation_data.sql..."
+          mysql --show-warnings --verbose --force -h 127.0.0.1 -uroot -proot reservationdb < ./resources/dbscript/reservation_data.sql
+
+      - name: Build Spring Boot Project
+        run: mvn clean package -DskipTests
+
+      - name: Start Spring Boot App
+        run: |
+          echo "Starting Spring Boot app on port 8688..."
+          java -jar target/*.jar --server.port=8688 > app.log 2>&1 &
+          APP_PID=$!
+          echo $APP_PID > app.pid
+
+          echo "Waiting for app to respond on http://localhost:8688/api/v1/transactions..."
+          for i in {1..60}; do
+            # Check if the process is still running
+            if ! kill -0 $APP_PID 2>/dev/null; then
+              echo "❌ Spring Boot app process died. Dumping logs:"
+              cat app.log
+              exit 1
+            fi
+            
+            # Check if the endpoint responds with any HTTP status
+            if curl -s -o /dev/null -w "%{http_code}" http://localhost:8688/api/v1/transactions | grep -q "200"; then
+              echo "✅ App is responding with HTTP 200!"
+              break
+            fi
+            
+            echo "⏳ ($i) Waiting for HTTP 200 response..."
+            sleep 2
+            
+            # Show last few lines of logs for debugging
+            if [ $i -eq 30 ]; then
+              echo "🔍 App logs (last 10 lines):"
+              tail -10 app.log
+            fi
+          done
+
+          # Final check
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8688/api/v1/transactions)
+          if [ "$HTTP_STATUS" != "200" ]; then
+            echo "❌ App failed to respond with HTTP 200. Got: $HTTP_STATUS"
+            echo "📋 Full application logs:"
+            cat app.log
+            exit 1
+          fi
+
+          echo "🎉 Spring Boot app is ready and responding!"
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run Postman Tests with Newman
+        run: |
+          newman run postman/moneygrab.postman_collection.json \
+            --environment postman/moneygrab.environment.json \
+            --reporters cli,json \
+            --reporter-json-export newman-report.json
+
+      - name: Upload Newman Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: newman-report.json
+
+      - name: Cleanup Spring Boot App
+        if: always()
+        run: |
+          if [ -f app.pid ]; then
+            APP_PID=$(cat app.pid)
+            if kill -0 $APP_PID 2>/dev/null; then
+              echo "🛑 Stopping Spring Boot app (PID: $APP_PID)"
+              kill $APP_PID
+            fi
+          fi
+
+      - name: Dump Spring Boot logs on failure
+        if: failure()
+        run: |
+          echo "📋 Spring Boot application logs:"
+          cat app.log
+
+  code_scan:
+    name: Code Quality Scan
+    needs: newman_test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SonarCloud Analysis
+        run: |
+          echo "Automatic Analysis result: https://sonarcloud.io/project/overview?id=NUS-ISS-SE-Group06_moneygrab-reservation"
