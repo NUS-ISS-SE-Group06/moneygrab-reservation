@@ -93,10 +93,6 @@ class TransactionServiceImplTest {
         mapperMock.verify(() -> TransactionMapper.toDto(any(Transaction.class)), times(2));
     }
 
-    /* ------------------------------------------------------------------
-     * Tests for listByMoneyChanger()
-     * ------------------------------------------------------------------ */
-
     @Test
     @DisplayName("listByMoneyChanger() should return mapped DTOs by moneyChangerId")
     void listByMoneyChangerReturnsMappedDtos() {
@@ -116,10 +112,6 @@ class TransactionServiceImplTest {
         verify(repository).findByMoneyChangerId(mcId);
         mapperMock.verify(() -> TransactionMapper.toDto(entities.get(0)));
     }
-
-    /* ------------------------------------------------------------------
-     * Tests for updateTransactionStatus(...)
-     * ------------------------------------------------------------------ */
 
     @Test
     @DisplayName("updateTransactionStatus() should return mapped DTO when update succeeds")
