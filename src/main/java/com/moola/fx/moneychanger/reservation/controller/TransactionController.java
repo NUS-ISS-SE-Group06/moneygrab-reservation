@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/v1")
+@RequestMapping("/v1/transactions")
 public class TransactionController {
 
     private final TransactionService service;
@@ -29,7 +29,7 @@ public class TransactionController {
      * GET /moneychanger/{moneyChangerId}/transactions
      * Returns all transactions as JSON for the moneychanger.
      */
-    @GetMapping("/moneychanger/{moneyChangerId}/transactions")
+    @GetMapping("/{moneyChangerId}")
   public ResponseEntity<List<TransactionDto>> listByMoneyChanger(
             @PathVariable @Positive int moneyChangerId) {
 
@@ -40,7 +40,7 @@ public class TransactionController {
      * GET /transactions
      * Returns all transactions as JSON.
      */
-    @GetMapping("/transactions")
+    @GetMapping("/")
     public ResponseEntity<List<TransactionDto>> listAllTransactions() {
         List<TransactionDto> all = service.listAll();
         return ResponseEntity.ok(all);
@@ -50,7 +50,7 @@ public class TransactionController {
      * Body: { "status": "COMPLETED" }
      * Header X-User-Id: caller’s userId (for audit)
      */
-@PatchMapping("/transactions/{id}/status")
+@PatchMapping("/{id}/status")
 public ResponseEntity<TransactionDto> updateTransactionStatus(
         @PathVariable int id,
         @RequestBody TransactionStatusUpdateRequestDto request) {
