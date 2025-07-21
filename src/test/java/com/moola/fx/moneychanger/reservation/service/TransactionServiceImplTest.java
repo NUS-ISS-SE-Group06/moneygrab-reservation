@@ -38,7 +38,6 @@ class TransactionServiceImplTest {
 
     private MockedStatic<TransactionMapper> mapperMock;
 
-    /* ---------- helper methods ---------- */
 
     private static Transaction entity(int id) {
         Transaction t = new Transaction();
@@ -56,7 +55,6 @@ class TransactionServiceImplTest {
         return d;
     }
 
-    /* ---------- test lifecycle ---------- */
 
     @BeforeEach
     void setUp() {
@@ -69,9 +67,7 @@ class TransactionServiceImplTest {
         mapperMock.close();
     }
 
-    /* ------------------------------------------------------------------
-     * Tests for listAll()
-     * ------------------------------------------------------------------ */
+  
 
     @Test
     @DisplayName("listAll() should return list of mapped DTOs")
