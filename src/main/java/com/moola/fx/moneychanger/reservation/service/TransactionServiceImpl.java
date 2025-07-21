@@ -90,10 +90,6 @@ public class TransactionServiceImpl implements TransactionService {
         result.setUpdatedAt(saved.getUpdatedAt());
         result.setCreatedBy(saved.getCreatedBy());
         result.setUpdatedBy(saved.getUpdatedBy());
-
-        // Optional: Fetch customerName if needed
-        // customerRepository.findById(saved.getCustomerId()).ifPresent(c -> result.setCustomerName(c.getName()));
-
         return result;
 
   }
