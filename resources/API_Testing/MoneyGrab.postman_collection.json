@@ -117,7 +117,7 @@
 						}
 					}
 				},
-				"url": "http://localhost:8688/api/v1/moneychanger/1/transactions"
+				"url": "http://localhost:8688/api/v1/transactions/1"
 			},
 			"response": []
 		},
@@ -231,7 +231,7 @@
 						}
 					}
 				},
-				"url": "http://localhost:8688/api/v1/transactions"
+				"url": "http://localhost:8688/api/v1/transactions/"
 			},
 			"response": []
 		},
