@@ -1,7 +1,7 @@
 
 ### Transaction
 ### List by moneyChangerId
-GET http://localhost:8688/api/v1/moneychanger/1/transactions
+GET http://localhost:8688/api/v1/transactions/moneychanger/1
 Content-Type: application/json
 [
     {
