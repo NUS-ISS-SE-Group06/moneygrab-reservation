@@ -53,12 +53,12 @@ class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("GET /v1/transactions/ returns list of all transactions")
+    @DisplayName("GET /v1/transactions/all returns list of all transactions")
     void testListAllTransactions() throws Exception {
         List<TransactionDto> mockList = List.of(mockDto(1), mockDto(2));
         when(service.listAll()).thenReturn(mockList);
 
-        mockMvc.perform(get("/v1/transactions/"))
+        mockMvc.perform(get("/v1/transactions/all"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2));
     }

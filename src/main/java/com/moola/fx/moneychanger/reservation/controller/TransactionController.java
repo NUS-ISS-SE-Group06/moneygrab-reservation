@@ -34,7 +34,7 @@ public class TransactionController {
         return ResponseEntity.ok(tx);           // 200 even if empty []
     }
    
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseEntity<List<TransactionDto>> listAllTransactions() {
         List<TransactionDto> all = service.listAll();
         return ResponseEntity.ok(all);
