@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    private final TransactionRepository repository; // <-- choose one name and keep it
+    private final TransactionRepository repository; // 
 
     // Spring injects the repository via constructor
     public TransactionServiceImpl(TransactionRepository repository) {
