@@ -79,15 +79,15 @@ Run the Spring Boot main class
 📁 Project Structure
 ```
 src/main/java/
-* │
-* ├── config/        # App configuration (datasource, security, beans)
-* ├── controller/    # REST API controllers
-* ├── dto/           # Request/Response DTOs
-* ├── exception/     # Custom exceptions & global handlers
-* ├── mapper/        # DTO-to-entity mappers
-* ├── model/         # JPA entities (database tables)
-* ├── repository/    # Spring Data JPA repositories
-* └── service/       # Business logic layer
+│
+├── config/        # App configuration (datasource, security, beans)
+├── controller/    # REST API controllers
+├── dto/           # Request/Response DTOs
+├── exception/     # Custom exceptions & global handlers
+├── mapper/        # DTO-to-entity mappers
+├── model/         # JPA entities (database tables)
+├── repository/    # Spring Data JPA repositories
+└── service/       # Business logic layer
 ```
 
 Additional Notes
