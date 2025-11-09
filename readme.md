@@ -111,3 +111,7 @@ created_by, updated_by, created_at, updated_at ensure traceability.
 AWS-Compatible Design
 
 Fully compatible with AWS RDS for production deployments.
+
+### Reservation Microservice Schema
+
+<img alt="ERD Diagram" src="resources/dbscript/reservationdb-ERD.png" width="200"/>
